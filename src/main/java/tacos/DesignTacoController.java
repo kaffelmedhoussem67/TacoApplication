@@ -4,10 +4,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.validation.Valid;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import lombok.extern.slf4j.Slf4j;
@@ -18,8 +23,8 @@ import tacos.Ingredient.Type;
 @RequestMapping("/design")//Specify the kind of requests that the controllers handles,it handles requests whose pasth begin with /design
 public class DesignTacoController {
 	
-	@GetMapping
-	public String showDesignForm(Model model) {
+	@ModelAttribute
+    public String showDesignForm(Model model) {
 		List<Ingredient> ingredients = Arrays.asList(
 				 new Ingredient("FLTO", "Flour Tortilla", Type.WRAP),
 				 new Ingredient("COTO", "Corn Tortilla", Type.WRAP),
@@ -43,9 +48,12 @@ public class DesignTacoController {
 	}
 	
 	@PostMapping
-	public String processDesign(Taco design) {
+	public String processDesign(@Valid  @ModelAttribute("design") Taco design, Errors error) {
+		if(error.hasErrors()) {
+		 return "design";
+		}
 		log.info("Processing design: " + design);
-		 return "redirect:/orders/current";
+		return "redirect:/orders/current";
 	}
 
 	private List<Ingredient> filterByType(List<Ingredient> ingredients, Type type) {
